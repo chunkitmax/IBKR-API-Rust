@@ -707,12 +707,14 @@ impl Display for Order {
         write!(
             f,
             "order_id = {},
+             parent_id = {},
              client_id = {},
              perm_id = {},
              order_type = {},
              action = {},
              total_quantity = {},
              lmt_price = {},
+             aux_price = {},
              tif = {},
              what_if = {},
              algo_strategy = {},
@@ -720,15 +722,21 @@ impl Display for Order {
              CMB = ({}),
              COND = ({}),\n",
             self.order_id,
+            self.parent_id,
             self.client_id,
             self.perm_id,
             self.order_type,
             self.action,
             self.total_quantity,
             if self.lmt_price == UNSET_DOUBLE {
-                format!("{:E}", self.lmt_price)
+                format!("{:?}", f64::NAN)
             } else {
                 format!("{:?}", self.lmt_price)
+            },
+            if self.aux_price == UNSET_DOUBLE {
+                format!("{:?}", f64::NAN)
+            } else {
+                format!("{:?}", self.aux_price)
             },
             self.tif,
             self.what_if,

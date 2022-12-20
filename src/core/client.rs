@@ -50,7 +50,7 @@ pub struct EClient<T>
 where
     T: Wrapper,
 {
-    wrapper: Arc<Mutex<T>>,
+    wrapper: Arc<T>,
     pub(crate) stream: Option<Box<dyn Streamer>>,
     host: String,
     port: u32,
@@ -67,7 +67,7 @@ impl<T> EClient<T>
 where
     T: Wrapper + Send + Sync + 'static,
 {
-    pub fn new(wrapper: Arc<Mutex<T>>) -> Self {
+    pub fn new(wrapper: Arc<T>) -> Self {
         EClient {
             wrapper: wrapper,
             stream: None,
@@ -151,7 +151,7 @@ where
         //An Interactive Broker's developer's note: "sometimes I get news before the server version, thus the loop"
         while fields.len() != 2 {
             if fields.len() > 0 {
-                decoder.interpret(fields.as_slice())?;
+                Decoder::interpret(self.wrapper.clone(), self.server_version, fields.as_slice())?;
             }
 
             let buf = reader.recv_packet()?;
@@ -178,7 +178,7 @@ where
         });
 
         thread::spawn(move || {
-            if decoder.run().is_err() {
+            if decoder.run() {
                 panic!("decoder.run() failed!!");
             }
         });
@@ -1718,8 +1718,8 @@ where
         msg.push_str(&make_field(&order.all_or_none)?);
         msg.push_str(&make_field_handle_empty(&order.min_qty)?);
         msg.push_str(&make_field_handle_empty(&order.percent_offset)?);
-        msg.push_str(&make_field(&order.e_trade_only)?);
-        msg.push_str(&make_field(&order.firm_quote_only)?);
+        msg.push_str(&make_field(&"")?); // msg.push_str(&make_field(&order.e_trade_only)?);
+        msg.push_str(&make_field(&"")?); // msg.push_str(&make_field(&order.firm_quote_only)?);
         msg.push_str(&make_field_handle_empty(&order.nbbo_price_cap)?);
         msg.push_str(&make_field(&(order.auction_strategy as i32))?); // AUCTION_MATCH, AUCTION_IMPROVEMENT, AUCTION_TRANSPARENT
         msg.push_str(&make_field_handle_empty(&order.starting_price)?);
@@ -2618,7 +2618,7 @@ where
     /// underlying. The contract details will be received via the contractDetails()
     /// function on the EWrapper.
     ///
-    ///    
+    ///
     /// # Arguments
     /// * req_id - The ID of the data request. Ensures that responses are
     ///            matched to requests if several requests are in process.
