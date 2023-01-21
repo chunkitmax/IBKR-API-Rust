@@ -27,16 +27,16 @@ pub fn main() -> Result<(), IBKRApiLibError> {
     };
 
     let wrapper = Arc::new(Mutex::new(TestWrapper::<TcpStreamer>::new()));
-    let app = Arc::new(Mutex::new(EClient::new(wrapper.clone())));
+    // let app = Arc::new(Mutex::new(EClient::new(wrapper.clone())));
 
     info!("getting connection...");
 
-    wrapper.lock().expect("Wrapper mutex was poisoned").client = Option::from(app.clone());
+    // wrapper.lock().expect("Wrapper mutex was poisoned").client = Option::from(app.clone());
 
     //use port 7497 for TWS or 4002 for IB Gateway, depending on the port you have set
-    app.lock()
-        .expect("EClient mutex was poisoned")
-        .connect("127.0.0.1", 4002, 0)?;
+    // app.lock()
+    //     .expect("EClient mutex was poisoned")
+    //     .connect("127.0.0.1", 4002, 0)?;
 
     thread::sleep(Duration::new(2, 0));
 
